@@ -18,6 +18,7 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ManageUsers  from "./pages/ManageUsers";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -76,6 +77,11 @@ const App = () => {
                 <Route path="/profile" element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                } />
+                    <Route path="/users" element={
+                  <ProtectedRoute>
+                    <ManageUsers />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />

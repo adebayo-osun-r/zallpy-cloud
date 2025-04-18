@@ -60,19 +60,19 @@ export function RecentReservations({ reservations }: RecentReservationsProps) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium truncate">{reservation.guestName}</h3>
+                    <h3 className="font-medium ">{reservation.guestName}</h3>
                     <Badge className={getStatusColor(reservation.status)} variant="outline">
                       {reservation.status}
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    Room {reservation.roomNumber} · {formatDate(reservation.checkIn)} - {formatDate(reservation.checkOut)}
+                     {reservation.roomNumber} · {formatDate(reservation.checkIn)} - {formatDate(reservation.checkOut)}
                   </div>
                 </div>
                 <div className="mt-2 md:mt-0 text-sm font-medium">
-                  {new Intl.NumberFormat('en-US', {
+                  {new Intl.NumberFormat('en-NG', {
                     style: 'currency',
-                    currency: 'USD'
+                    currency: 'NGN'
                   }).format(reservation.totalAmount)}
                 </div>
               </div>

@@ -19,11 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { 
-  Edit, 
-  Filter, 
-  Plus, 
-  Search, 
+import {
+  Edit,
+  Filter,
+  Plus,
+  Search,
   Star,
   User
 } from "lucide-react";
@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Guests() {
   const [showDialog, setShowDialog] = useState(false);
-const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
+  const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,11 +91,55 @@ const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
     fetchGuests();
   }, []);
 
-  const filteredGuests = guests.filter(guest => 
+  const filteredGuests = guests.filter(guest =>
     guest.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guest.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guest.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const computeGuestStats = async () => {
+    try {
+      const { data: reservations, error } = await supabase
+        .from("reservations")
+        .select("guest_id, total_amount");
+
+      if (error) throw error;
+
+      const statsMap = new Map<string, { totalStays: number; totalSpent: number }>();
+
+      reservations.forEach((res) => {
+        const guestId = res.guest_id;
+        const price = res.total_amount || 0;
+
+        if (!statsMap.has(guestId)) {
+          statsMap.set(guestId, { totalStays: 0, totalSpent: 0 });
+        }
+
+        const guestStats = statsMap.get(guestId)!;
+        guestStats.totalStays += 1;
+        guestStats.totalSpent += price;
+      });
+
+      // Update each guest
+      for (const [guestId, { totalStays, totalSpent }] of statsMap.entries()) {
+        const { error } = await supabase
+          .from("guests")
+          .update({ total_stays: totalStays, total_spent: totalSpent })
+          .eq("id", guestId);
+
+        if (error) throw error;
+      }
+
+      toast({ title: "Guest stats updated!" });
+
+    } catch (err: any) {
+      toast({
+        title: "Error updating guest stats",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const getVipStatusColor = (status?: string) => {
     switch (status) {
@@ -109,7 +153,7 @@ const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
   return (
     <AppLayout title="Guests">
 
-     <AddGuestDialog
+      <AddGuestDialog
         open={showDialog}
         onOpenChange={setShowDialog}
         onSave={(newGuest) => {
@@ -122,7 +166,7 @@ const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
         }}
         guestToEdit={selectedGuest}
       />
-  
+
       <div className="flex flex-col space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -132,9 +176,9 @@ const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Filter
+          
+            <Button onClick={computeGuestStats} variant="outline" size="sm">
+              Recalculate Stats
             </Button>
             <Button variant="default" size="sm" onClick={() => {
               setShowDialog(true);
@@ -219,16 +263,16 @@ const [selectedGuest, setSelectedGuest] = useState<Guest | undefined>();
                           ) : null}
                         </TableCell>
                         <TableCell>{guest.totalStays || 0}</TableCell>
-                        <TableCell>${(guest.totalSpent || 0).toFixed(2)}</TableCell>
+                        <TableCell>₦{(guest.totalSpent || 0).toFixed(2)}</TableCell>
                         <TableCell className="text-right">
-                          <Button onClick={()=>{
+                          <Button onClick={() => {
                             setShowDialog(true);
                             setSelectedGuest(guest);
                           }} variant="outline" size="icon" className="h-8 w-8">
                             <Edit className="h-4 w-4" />
                           </Button>
 
-                      
+
                         </TableCell>
                       </TableRow>
                     ))

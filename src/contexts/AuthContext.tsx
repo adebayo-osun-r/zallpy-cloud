@@ -28,10 +28,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (event === 'SIGNED_IN') {
-          toast({
+        /*   toast({
             title: "Welcome back!",
             description: "You have successfully signed in.",
-          });
+          }); */
         } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out",

@@ -104,7 +104,8 @@ export function ReservationForm({ reservation, onSuccess, onCancel }: Reservatio
         // Fetch available rooms
         const { data: roomsData, error: roomsError } = await supabase
           .from("rooms")
-          .select("id, number");
+          .select("id, number, status")
+        .eq("status", "Available"); // Filter by status = "Available"
 
         if (roomsError) throw roomsError;
         setRooms(roomsData || []);
@@ -165,10 +166,19 @@ export function ReservationForm({ reservation, onSuccess, onCancel }: Reservatio
         result = await supabase
           .from("reservations")
           .insert([formattedData]);
+
+          if (result.error) throw result.error;
+
+          // If the reservation was successfully created, update the room status
+          const roomUpdateResult = await supabase
+            .from("rooms")
+            .update({ status: "Reserved" })
+            .eq("id", data.roomId);
+    
+          if (roomUpdateResult.error) throw roomUpdateResult.error;
       }
 
-      if (result.error) throw result.error;
-
+     
       toast({
         title: isEditing ? "Reservation updated" : "Reservation created",
         description: isEditing

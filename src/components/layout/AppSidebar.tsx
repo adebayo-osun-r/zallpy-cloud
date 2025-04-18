@@ -76,9 +76,9 @@ const bottomMenuItems = [
     icon: UserCircle,
   },
   {
-    title: "Logout",
-    path: "/logout",
-    icon: LogOut,
+    title: "Manage Users",
+    path: "/users",
+    icon: Users,
   },
 ];
 

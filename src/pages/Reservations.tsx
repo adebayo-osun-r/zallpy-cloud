@@ -105,18 +105,40 @@ export default function Reservations() {
 
   const handleUpdateStatus = async (reservationId: string, newStatus: ReservationStatus) => {
     try {
-      const { error } = await supabase
-        .from("reservations")
-        .update({ status: newStatus })
-        .eq("id", reservationId);
-
-      if (error) throw error;
-
+      // First, find the reservation to get the room ID
+      const reservation = reservations.find(res => res.id === reservationId);
+      if (!reservation) throw new Error("Reservation not found");
+  
+      // Determine the new room status based on reservation status
+      let newRoomStatus: string | null = null;
+      if (newStatus === "Checked In") newRoomStatus = "Occupied";
+      else if (newStatus === "Checked Out") newRoomStatus = "Available";
+  
+      // Start the update process
+      const updates = [];
+  
+      // Update reservation status
+      updates.push(
+        supabase.from("reservations").update({ status: newStatus }).eq("id", reservationId)
+      );
+  
+      // If needed, update room status
+      if (newRoomStatus) {
+        updates.push(
+          supabase.from("rooms").update({ status: newRoomStatus }).eq("id", reservation.roomId)
+        );
+      }
+  
+      const [reservationRes, roomRes] = await Promise.all(updates);
+  
+      if (reservationRes.error) throw reservationRes.error;
+      if (roomRes && roomRes.error) throw roomRes.error;
+  
       toast({
         title: "Status updated",
         description: `Reservation status updated to ${newStatus}`,
       });
-
+  
       // Update local state
       setReservations(
         reservations.map((res) =>
@@ -131,6 +153,7 @@ export default function Reservations() {
       });
     }
   };
+  
 
   const getStatusColor = (status: ReservationStatus) => {
     switch (status) {
@@ -232,7 +255,7 @@ export default function Reservations() {
                             {reservation.paymentStatus}
                           </Badge>
                         </TableCell>
-                        <TableCell>${reservation.totalAmount.toFixed(2)}</TableCell>
+                        <TableCell>₦{reservation.totalAmount.toFixed(2)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-1">
                             {reservation.status === "Confirmed" && (

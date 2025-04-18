@@ -30,9 +30,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
   // Format currency for tooltip
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'NGN',
       minimumFractionDigits: 0
     }).format(value);
   };
@@ -59,14 +59,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis 
-              tickFormatter={(value) => `$${value / 1000}k`}
+              tickFormatter={(value) => `₦${value / 1000}k`}
             />
             <Tooltip 
               formatter={(value) => [formatCurrency(value as number), "Revenue"]}
               labelFormatter={(label) => `Date: ${label}`}
             />
             <Legend />
-            <Bar dataKey="roomRevenue" name="Room Revenue" stackId="a" fill="#0ea5e9" />
+            <Bar dataKey="roomRevenue" name="Room" stackId="a" fill="#0ea5e9" />
             <Bar dataKey="foodRevenue" name="Food" stackId="a" fill="#f3b72e" />
             <Bar dataKey="beverageRevenue" name="Beverage" stackId="a" fill="#6366f1" />
             <Bar dataKey="serviceRevenue" name="Services" stackId="a" fill="#22c55e" />

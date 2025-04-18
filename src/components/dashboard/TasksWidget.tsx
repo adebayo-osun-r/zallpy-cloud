@@ -77,7 +77,7 @@ export function TasksWidget({ tasks }: TasksWidgetProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium">Room {task.roomNumber}</h3>
+                      <h3 className="font-medium">{task.roomNumber}</h3>
                       <Badge className={getPriorityColor(task.priority)} variant="outline">
                         {task.priority}
                       </Badge>

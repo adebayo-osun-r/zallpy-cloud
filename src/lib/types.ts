@@ -124,6 +124,7 @@ export interface HousekeepingTask {
   completedAt?: string;
 }
 
+
 // Analytics Types
 export interface OccupancyData {
   date: string;
@@ -141,3 +142,13 @@ export interface RevenueData {
   otherRevenue: number;
   totalRevenue: number;
 }
+
+export interface User{
+  firstName:string;
+  lastName:string;
+  email:string;
+  password:string;
+  confirmPassword?:string;  
+}
+
+

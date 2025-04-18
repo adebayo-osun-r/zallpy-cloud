@@ -17,8 +17,8 @@ export type Database = {
           date: string | null
           description: string
           guest_id: string | null
-          invoice_id: string | null
           id: string
+          invoice_id: string | null
           reservation_id: string | null
           status: string | null
           updated_at: string | null
@@ -30,8 +30,8 @@ export type Database = {
           date?: string | null
           description: string
           guest_id?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           reservation_id?: string | null
           status?: string | null
           updated_at?: string | null
@@ -43,8 +43,8 @@ export type Database = {
           date?: string | null
           description?: string
           guest_id?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           reservation_id?: string | null
           status?: string | null
           updated_at?: string | null
@@ -390,6 +390,48 @@ export type Database = {
           status?: string | null
           type?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          currency: string | null
+          dark_mode: boolean | null
+          email_notifications: boolean | null
+          hotel_name: string | null
+          id: string
+          language: string | null
+          sms_notifications: boolean | null
+          time_zone: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          currency?: string | null
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          hotel_name?: string | null
+          id?: string
+          language?: string | null
+          sms_notifications?: boolean | null
+          time_zone?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          currency?: string | null
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          hotel_name?: string | null
+          id?: string
+          language?: string | null
+          sms_notifications?: boolean | null
+          time_zone?: string | null
         }
         Relationships: []
       }

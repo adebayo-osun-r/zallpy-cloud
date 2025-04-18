@@ -19,13 +19,105 @@ import { OccupancyChart } from "@/components/dashboard/OccupancyChart";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { RoomStatusOverview } from "@/components/dashboard/RoomStatusOverview";
 import { RecentReservations } from "@/components/dashboard/RecentReservations";
-import { occupancyData, revenueData, reservations, rooms } from "@/data/mockData";
+
+import { useOccupancyData } from "@/hooks/useOccupancyData";
+import useRooms from '@/hooks/useRooms'
+import useRevenueData from "@/hooks/useRevenueData";
+import useReservations from "@/hooks/useReservations";
 
 export default function Analytics() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date()
   });
+
+  // Function to calculate the total days between two dates
+  const calculateTotalDays = (from: Date, to: Date): number => {
+    const timeDifference = to.getTime() - from.getTime();
+    return Math.ceil(timeDifference / (1000 * 3600 * 24)); // Convert from milliseconds to days
+  };
+
+  const { rooms } = useRooms();
+  const { revenueData } = useRevenueData();
+  const { reservations } = useReservations();
+  const { occupancyData, loading } = useOccupancyData(calculateTotalDays(dateRange.from, dateRange.to));
+
+  if (loading) return <p>Loading...</p>;
+
+  // Function to calculate metrics for the last month
+  const calculateLastMonthData = () => {
+    const lastMonthDate = new Date();
+    lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+
+    // Get the start and end dates of last month
+    const startOfLastMonth = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth(), 1);
+    const endOfLastMonth = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth() + 1, 0);
+
+    // Filter reservations and calculate metrics for the last month
+    const lastMonthReservations = reservations.filter((reservation) => {
+      const checkIn = new Date(reservation.checkIn);
+      const checkOut = new Date(reservation.checkOut);
+      return (
+        (checkIn >= startOfLastMonth && checkIn <= endOfLastMonth) ||
+        (checkOut >= startOfLastMonth && checkOut <= endOfLastMonth) ||
+        (checkIn <= startOfLastMonth && checkOut >= endOfLastMonth)
+      );
+    });
+
+    // Calculate last month total revenue
+    const lastMonthRevenue = lastMonthReservations.reduce((total, reservation) => {
+      return total + reservation.totalAmount;
+    }, 0);
+
+    // Calculate last month occupied rooms
+    const lastMonthOccupiedRooms = lastMonthReservations.length;
+
+    // Calculate last month occupancy rate
+    const lastMonthOccupancyRate = (lastMonthOccupiedRooms / rooms.length) * 100;
+
+    // Calculate last month ADR (Average Daily Rate)
+    const lastMonthAdr = lastMonthRevenue / lastMonthOccupiedRooms || 0;
+
+    // Calculate last month RevPAR (Revenue per Available Room)
+    const lastMonthRevpar = lastMonthRevenue / rooms.length;
+
+    return {
+      totalRevenue: lastMonthRevenue,
+      occupiedRooms: lastMonthOccupiedRooms,
+      occupancyRate: lastMonthOccupancyRate,
+      adr: lastMonthAdr,
+      revpar: lastMonthRevpar,
+    };
+  };
+
+  const lastMonthData = calculateLastMonthData();
+
+  // Compute current month metrics
+  const totalRevenue = revenueData.reduce((total, data) => total + data.totalRevenue, 0);
+  const occupiedRooms = reservations.filter(
+    (reservation) => new Date(reservation.checkIn) <= new Date() && new Date(reservation.checkOut) >= new Date()
+  ).length;
+  const occupancyRate = (occupiedRooms / rooms.length) * 100;
+  const adr = totalRevenue / occupiedRooms || 0;
+  const revpar = totalRevenue / rooms.length;
+
+  const calculateImprovement = (current: number, lastMonth: number): string => {
+    // Check if last month's value is 0
+    if (lastMonth === 0) {
+      // If last month's value is 0, return "Infinity" or "N/A" based on the context
+      return current > 0 ? "Infinity" : "N/A"; // If current is positive, it implies an infinite improvement
+    }
+  
+    // Normal percentage improvement calculation
+    const improvement = ((current - lastMonth) / lastMonth) * 100;
+    return improvement.toFixed(2); // Return the improvement as a percentage with two decimal points
+  };
+  
+  const totalRevenueImprovement = calculateImprovement(totalRevenue, lastMonthData.totalRevenue);
+  const occupancyRateImprovement = calculateImprovement(occupancyRate, lastMonthData.occupancyRate);
+  const adrImprovement = calculateImprovement(adr, lastMonthData.adr);
+  const revparImprovement = calculateImprovement(revpar, lastMonthData.revpar);
+
 
   return (
     <AppLayout title="Analytics">
@@ -82,9 +174,9 @@ export default function Analytics() {
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$24,325.49</div>
+              <div className="text-2xl font-bold">₦{totalRevenue.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-500">+5.1%</span> from last month
+                <span className="text-green-500">+{totalRevenueImprovement}%</span> from last month
               </p>
             </CardContent>
           </Card>
@@ -93,9 +185,9 @@ export default function Analytics() {
               <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">76.2%</div>
+              <div className="text-2xl font-bold">{occupancyRate.toFixed(1)}%</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-500">+2.3%</span> from last month
+                <span className="text-green-500">+{occupancyRateImprovement}%</span> from last month
               </p>
             </CardContent>
           </Card>
@@ -104,9 +196,9 @@ export default function Analytics() {
               <CardTitle className="text-sm font-medium">Average Daily Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$154.32</div>
+              <div className="text-2xl font-bold">₦{adr.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-500">+1.5%</span> from last month
+                <span className="text-green-500">+{adrImprovement}%</span> from last month
               </p>
             </CardContent>
           </Card>
@@ -115,9 +207,9 @@ export default function Analytics() {
               <CardTitle className="text-sm font-medium">RevPAR</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$117.59</div>
+              <div className="text-2xl font-bold">₦{revpar.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                <span className="text-green-500">+3.7%</span> from last month
+                <span className="text-green-500">+{revparImprovement}%</span> from last month
               </p>
             </CardContent>
           </Card>

@@ -3,9 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 const SUPABASE_URL = "https://hfrwzmqkwtizazygdxrb.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmcnd6bXFrd3RpemF6eWdkeHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTEzNjIsImV4cCI6MjA2MDI2NzM2Mn0.EgPdO8e4D77f2kP-vtQxNtFQC3iRw_XN8i12dnsASaM";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmcnd6bXFrd3RpemF6eWdkeHJiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDY5MTM2MiwiZXhwIjoyMDYwMjY3MzYyfQ.NMHxoqaN8kABBamhdtGWnNmLBsE-jQ2dwOmDpKUnSGc";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
+
+//npx supabase gen types typescript --project-id hfrwzmqkwtizazygdxrb > database.types.ts
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
